@@ -446,6 +446,7 @@ export const conflicts: Conflict[] = [
       activities.find((a) => a.id === "a5")!,
     ],
     severity: "medium",
+    status: "unresolved",
     description:
       "Emma's soccer practice and Liam's piano lesson overlap on Monday at 4 PM. Both require a parent for drop-off/pickup.",
     suggestions: [
@@ -479,6 +480,7 @@ export const conflicts: Conflict[] = [
       activities.find((a) => a.id === "a16")!,
     ],
     severity: "medium",
+    status: "unresolved",
     description:
       "Wednesday after-school is tight. Emma's soccer and Liam's basketball both start at 4 PM at different locations.",
     suggestions: [
@@ -505,6 +507,7 @@ export const conflicts: Conflict[] = [
       activities.find((a) => a.id === "a29")!,
     ],
     severity: "low",
+    status: "unresolved",
     description:
       "Saturday morning: Liam's basketball (9–10:30 AM) and Mia's dance rehearsal (10–11:30 AM) overlap by 30 minutes.",
     suggestions: [
@@ -531,6 +534,7 @@ export const conflicts: Conflict[] = [
       activities.find((a) => a.id === "a22")!,
     ],
     severity: "high",
+    status: "unresolved",
     description:
       "Thursday: Emma's math tutoring and Mia's pediatrician appointment are both at 3:30 PM. The appointment cannot be moved.",
     suggestions: [
@@ -569,6 +573,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "creative-activity",
     label: "Afternoon creative window",
     isProtected: false,
+    status: "open",
   },
   {
     id: "ft2",
@@ -579,6 +584,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "family-window",
     label: "Evening family time",
     isProtected: true,
+    status: "protected",
   },
   {
     id: "ft3",
@@ -589,6 +595,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "short-reset",
     label: "Post-tutoring wind-down",
     isProtected: true,
+    status: "protected",
   },
   {
     id: "ft4",
@@ -599,6 +606,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "outdoor-activity",
     label: "Open afternoon block",
     isProtected: false,
+    status: "open",
   },
   {
     id: "ft5",
@@ -609,6 +617,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "family-window",
     label: "Post-practice family evening",
     isProtected: false,
+    status: "open",
   },
   {
     id: "ft6",
@@ -619,6 +628,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "leave-unscheduled",
     label: "Mia's quiet afternoon — best left open",
     isProtected: true,
+    status: "protected",
   },
   {
     id: "ft7",
@@ -629,6 +639,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "leave-unscheduled",
     label: "Thursday is busy — protect this downtime",
     isProtected: true,
+    status: "protected",
   },
   {
     id: "ft8",
@@ -639,6 +650,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "outdoor-activity",
     label: "TGIF outdoor window",
     isProtected: false,
+    status: "open",
   },
   {
     id: "ft9",
@@ -649,6 +661,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "family-window",
     label: "Saturday midday family time",
     isProtected: false,
+    status: "open",
   },
   {
     id: "ft10",
@@ -659,6 +672,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "creative-activity",
     label: "Liam's creative afternoon",
     isProtected: false,
+    status: "open",
   },
   {
     id: "ft11",
@@ -669,6 +683,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "leave-unscheduled",
     label: "Sunday rest — keep it easy",
     isProtected: true,
+    status: "protected",
   },
   {
     id: "ft12",
@@ -679,6 +694,7 @@ export const freeTimeBlocks: FreeTimeBlock[] = [
     quality: "outdoor-activity",
     label: "Sunday afternoon — ideal for a family outing",
     isProtected: false,
+    status: "open",
   },
 ];
 
@@ -696,6 +712,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "family",
     whyItFits:
       "Sunday afternoon is wide open with no commitments. A gentle outdoor activity is perfect after a structured week.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s2",
@@ -710,6 +728,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child2",
     whyItFits:
       "Saturday afternoon is open for Liam while Emma is at the birthday party. This plays to his interests without adding driving time.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s3",
@@ -724,6 +744,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child1",
     whyItFits:
       "After math tutoring, Emma needs something relaxing and self-directed. Art is her favorite way to decompress.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s4",
@@ -738,6 +760,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child3",
     whyItFits:
       "Mia has a long free afternoon on Mondays after kindergarten. A burst of movement fits her energy and interests.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s5",
@@ -752,6 +776,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "family",
     whyItFits:
       "Wednesday evening is free after practices wrap up. A calm group activity brings the family together mid-week.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s6",
@@ -766,6 +792,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child1",
     whyItFits:
       "Saturday midday is open. Emma loves science and this uses a kit you already have at home.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s7",
@@ -780,6 +808,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child1",
     whyItFits:
       "Thursday evening is protected downtime. Reading is Emma's preferred way to unwind after a packed day.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s8",
@@ -794,6 +824,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "family",
     whyItFits:
       "After a full week, Sunday midday is the perfect time to simply rest. Protect this space intentionally.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s9",
@@ -808,6 +840,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child2",
     whyItFits:
       "Tuesday afternoon is open for Liam. Unstructured piano time reinforces his lessons without pressure.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
   {
     id: "s10",
@@ -822,6 +856,8 @@ export const suggestions: Suggestion[] = [
     forChildId: "child3",
     whyItFits:
       "Friday afternoon is open. Outdoor play is ideal for Mia's energy level and developmental stage.",
+    isSaved: false,
+    isTryThisWeek: false,
   },
 ];
 
@@ -833,6 +869,8 @@ export const familySettings: FamilySettings = {
   notifyConflicts: true,
   notifyFreeTime: true,
   notifyWeeklyPlan: true,
+  familyName: "The Johnsons",
+  parentName: "Sarah",
 };
 
 export const weeklyLoad: DayLoad[] = [

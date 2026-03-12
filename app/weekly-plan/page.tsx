@@ -16,10 +16,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ActivityBadge } from "@/components/shared/activity-badge";
-import { weeklyPlan, getChildName } from "@/data/mock-data";
+import { weeklyPlan } from "@/data/mock-data";
+import { useFamily } from "@/lib/family-context";
 import { formatTimeRange } from "@/lib/utils";
 
 export default function WeeklyPlanPage() {
+  const { getChildName } = useFamily();
   return (
     <div className="space-y-6">
       <PageHeader

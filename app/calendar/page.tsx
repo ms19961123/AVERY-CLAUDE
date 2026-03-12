@@ -1,17 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Calendar as CalendarIcon, Filter, ChevronRight, MapPin, Clock as ClockIcon, X } from "lucide-react";
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import {
+  Calendar as CalendarIcon,
+  Filter,
+  MapPin,
+  Clock as ClockIcon,
+  Plus,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FilterChips } from "@/components/shared/filter-chips";
 import { ActivityBadge } from "@/components/shared/activity-badge";
-import { ChildAvatar } from "@/components/shared/child-avatar";
-import { activities, children, getChildName, getChildById } from "@/data/mock-data";
+import { Modal } from "@/components/shared/modal";
+import { ActivityForm } from "@/components/shared/activity-form";
+import { useFamily } from "@/lib/family-context";
 import { formatTimeRange, getCategoryDot } from "@/lib/utils";
-import { Activity, DayOfWeek, ActivityCategory } from "@/types";
+import { Activity, DayOfWeek } from "@/types";
 
 const days: DayOfWeek[] = [
   "Monday",
@@ -21,12 +31,6 @@ const days: DayOfWeek[] = [
   "Friday",
   "Saturday",
   "Sunday",
-];
-
-const childFilters = [
-  { value: "all", label: "All" },
-  ...children.map((c) => ({ value: c.id, label: c.name })),
-  { value: "family", label: "Family" },
 ];
 
 const categoryFilters = [
@@ -40,14 +44,33 @@ const categoryFilters = [
   { value: "social", label: "Social" },
 ];
 
-const hours = Array.from({ length: 13 }, (_, i) => i + 8); // 8 AM to 8 PM
-
 export default function CalendarPage() {
+  const {
+    children,
+    activities,
+    addActivity,
+    updateActivity,
+    removeActivity,
+    getChildName,
+  } = useFamily();
+
   const [childFilter, setChildFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedEvent, setSelectedEvent] = useState<Activity | null>(null);
   const [view, setView] = useState<"week" | "day">("week");
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>("Monday");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Activity | null>(null);
+  const [addForDay, setAddForDay] = useState<DayOfWeek | null>(null);
+
+  const childFilters = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      ...children.map((c) => ({ value: c.id, label: c.name })),
+      { value: "family", label: "Family" },
+    ],
+    [children]
+  );
 
   const filtered = activities.filter((a) => {
     if (childFilter !== "all" && a.childId !== childFilter) return false;
@@ -59,18 +82,30 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Calendar"
-        description="Your family's weekly schedule at a glance. Tap any event for details."
-        icon={CalendarIcon}
-      />
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title="Calendar"
+          description="Your family's weekly schedule at a glance. Tap any event to view or edit."
+          icon={CalendarIcon}
+        />
+        <Button
+          onClick={() => {
+            setAddForDay(null);
+            setShowAddModal(true);
+          }}
+          className="bg-teal-500 hover:bg-teal-600 text-white shrink-0"
+        >
+          <Plus size={16} className="mr-1.5" />
+          Add Event
+        </Button>
+      </div>
 
       {/* Filters */}
       <Card className="p-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-navy-500">
             <Filter size={14} />
-            <span className="font-medium">Filter by child:</span>
+            <span className="font-medium">Child:</span>
           </div>
           <FilterChips
             options={childFilters}
@@ -137,7 +172,11 @@ export default function CalendarPage() {
         transition={{ duration: 0.3 }}
       >
         <Card className="overflow-hidden">
-          <div className={`grid ${view === "week" ? "grid-cols-7" : "grid-cols-1"} divide-x divide-navy-100`}>
+          <div
+            className={`grid ${
+              view === "week" ? "grid-cols-7" : "grid-cols-1"
+            } divide-x divide-navy-100`}
+          >
             {displayDays.map((day) => {
               const dayEvents = filtered
                 .filter((a) => a.day === day)
@@ -145,49 +184,69 @@ export default function CalendarPage() {
 
               return (
                 <div key={day} className="min-h-[400px]">
-                  <div className="sticky top-0 bg-navy-50/80 backdrop-blur-sm border-b border-navy-100 px-3 py-3 text-center">
+                  <div className="sticky top-0 bg-navy-50/80 backdrop-blur-sm border-b border-navy-100 px-3 py-3 flex items-center justify-between">
                     <p className="text-xs font-medium text-navy-400 uppercase">
                       {view === "week" ? day.slice(0, 3) : day}
                     </p>
+                    <button
+                      onClick={() => {
+                        setAddForDay(day);
+                        setShowAddModal(true);
+                      }}
+                      className="p-1 rounded-md hover:bg-navy-100 text-navy-300 hover:text-teal-500 transition-colors"
+                      title={`Add event on ${day}`}
+                    >
+                      <Plus size={12} />
+                    </button>
                   </div>
                   <div className="p-2 space-y-1.5">
                     {dayEvents.length === 0 && (
                       <div className="text-center py-8">
                         <p className="text-xs text-navy-300">No events</p>
+                        <button
+                          onClick={() => {
+                            setAddForDay(day);
+                            setShowAddModal(true);
+                          }}
+                          className="text-xs text-teal-500 hover:text-teal-600 mt-1"
+                        >
+                          + Add one
+                        </button>
                       </div>
                     )}
-                    {dayEvents.map((event) => {
-                      const child = getChildById(event.childId);
-                      return (
-                        <button
-                          key={event.id}
-                          onClick={() => setSelectedEvent(event)}
-                          className="w-full text-left group"
-                        >
-                          <div className="rounded-xl border border-navy-100/50 bg-white p-2.5 hover:shadow-md hover:border-navy-200 transition-all cursor-pointer">
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <div
-                                className={`h-2 w-2 rounded-full ${getCategoryDot(
-                                  event.category
-                                )}`}
-                              />
-                              <span className="text-[10px] font-medium text-navy-400">
-                                {formatTimeRange(
-                                  event.startTime,
-                                  event.endTime
-                                )}
-                              </span>
-                            </div>
-                            <p className="text-xs font-semibold text-navy-700 leading-tight mb-1">
-                              {event.title}
-                            </p>
+                    {dayEvents.map((event) => (
+                      <button
+                        key={event.id}
+                        onClick={() => setSelectedEvent(event)}
+                        className="w-full text-left group"
+                      >
+                        <div className="rounded-xl border border-navy-100/50 bg-white p-2.5 hover:shadow-md hover:border-navy-200 transition-all cursor-pointer">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <div
+                              className={`h-2 w-2 rounded-full ${getCategoryDot(
+                                event.category
+                              )}`}
+                            />
+                            <span className="text-[10px] font-medium text-navy-400">
+                              {formatTimeRange(event.startTime, event.endTime)}
+                            </span>
+                          </div>
+                          <p className="text-xs font-semibold text-navy-700 leading-tight mb-1">
+                            {event.title}
+                          </p>
+                          <div className="flex items-center justify-between">
                             <p className="text-[10px] text-navy-400">
                               {getChildName(event.childId)}
                             </p>
+                            {event.recurring && (
+                              <span className="text-[9px] text-teal-500 font-medium">
+                                ↻
+                              </span>
+                            )}
                           </div>
-                        </button>
-                      );
-                    })}
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               );
@@ -197,79 +256,139 @@ export default function CalendarPage() {
       </motion.div>
 
       {/* Event Detail Modal */}
-      <AnimatePresence>
+      <Modal
+        open={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        title={selectedEvent?.title ?? ""}
+      >
         {selectedEvent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-navy-900/40 backdrop-blur-sm"
-              onClick={() => setSelectedEvent(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl border border-navy-100 p-6"
-            >
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="absolute top-4 right-4 p-1 rounded-lg hover:bg-navy-50 text-navy-400"
-              >
-                <X size={16} />
-              </button>
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`h-3 w-3 rounded-full ${getCategoryDot(selectedEvent.category)}`} />
-                <h3 className="text-lg font-bold text-navy-800">
-                  {selectedEvent.title}
-                </h3>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-navy-600">
+                <ClockIcon size={14} className="text-navy-400" />
+                <span>
+                  {selectedEvent.day},{" "}
+                  {formatTimeRange(selectedEvent.startTime, selectedEvent.endTime)}
+                </span>
               </div>
-              <div className="space-y-3">
+              {selectedEvent.location && (
                 <div className="flex items-center gap-2 text-sm text-navy-600">
-                  <ClockIcon size={14} className="text-navy-400" />
-                  <span>
-                    {selectedEvent.day},{" "}
-                    {formatTimeRange(selectedEvent.startTime, selectedEvent.endTime)}
-                  </span>
+                  <MapPin size={14} className="text-navy-400" />
+                  <span>{selectedEvent.location}</span>
                 </div>
-                {selectedEvent.location && (
-                  <div className="flex items-center gap-2 text-sm text-navy-600">
-                    <MapPin size={14} className="text-navy-400" />
-                    <span>{selectedEvent.location}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-navy-500">For:</span>
-                  <span className="text-sm font-medium text-navy-700">
-                    {getChildName(selectedEvent.childId)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-navy-500">Category:</span>
-                  <ActivityBadge category={selectedEvent.category} />
-                </div>
-                {selectedEvent.notes && (
-                  <div className="p-3 rounded-xl bg-navy-50 border border-navy-100">
-                    <p className="text-sm text-navy-600">{selectedEvent.notes}</p>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <Badge
-                    className={
-                      selectedEvent.recurring
-                        ? "bg-teal-50 text-teal-700 border-teal-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
-                    }
-                  >
-                    {selectedEvent.recurring ? "Recurring" : "One-time"}
-                  </Badge>
-                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-navy-500">For:</span>
+                <span className="text-sm font-medium text-navy-700">
+                  {getChildName(selectedEvent.childId)}
+                </span>
               </div>
-            </motion.div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-navy-500">Category:</span>
+                <ActivityBadge category={selectedEvent.category} />
+              </div>
+              {selectedEvent.notes && (
+                <div className="p-3 rounded-xl bg-navy-50 border border-navy-100">
+                  <p className="text-sm text-navy-600">{selectedEvent.notes}</p>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Badge
+                  className={
+                    selectedEvent.recurring
+                      ? "bg-teal-50 text-teal-700 border-teal-200"
+                      : "bg-amber-50 text-amber-700 border-amber-200"
+                  }
+                >
+                  {selectedEvent.recurring ? "Recurring" : "One-time"}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2 border-t border-navy-100">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setEditingEvent(selectedEvent);
+                  setSelectedEvent(null);
+                }}
+              >
+                <Pencil size={14} className="mr-1" /> Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  removeActivity(selectedEvent.id);
+                  setSelectedEvent(null);
+                }}
+              >
+                <Trash2 size={14} className="mr-1" /> Remove
+              </Button>
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </Modal>
+
+      {/* Add Activity Modal */}
+      <Modal
+        open={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          setAddForDay(null);
+        }}
+        title="Add Activity"
+        description="Add a new event to your schedule."
+      >
+        <ActivityForm
+          activity={
+            addForDay
+              ? ({
+                  title: "",
+                  category: "family",
+                  childId: "family",
+                  day: addForDay,
+                  startTime: "09:00",
+                  endTime: "10:00",
+                  recurring: false,
+                } as any)
+              : undefined
+          }
+          onSave={(activity) => {
+            addActivity(activity as any);
+            setShowAddModal(false);
+            setAddForDay(null);
+          }}
+          onCancel={() => {
+            setShowAddModal(false);
+            setAddForDay(null);
+          }}
+        />
+      </Modal>
+
+      {/* Edit Activity Modal */}
+      <Modal
+        open={!!editingEvent}
+        onClose={() => setEditingEvent(null)}
+        title="Edit Activity"
+        description="Update this activity's details."
+      >
+        {editingEvent && (
+          <ActivityForm
+            activity={editingEvent}
+            onSave={(activity) => {
+              updateActivity(activity as Activity);
+              setEditingEvent(null);
+            }}
+            onCancel={() => setEditingEvent(null)}
+            onDelete={() => {
+              removeActivity(editingEvent.id);
+              setEditingEvent(null);
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

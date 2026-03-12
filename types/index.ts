@@ -30,6 +30,12 @@ export type FreeTimeQuality =
 
 export type PlanningStyle = "balanced" | "lightly-structured" | "growth-focused";
 
+export type PlanTier = "free" | "plus" | "premium";
+
+export type ConflictStatus = "unresolved" | "reviewed" | "resolved";
+
+export type FreeTimeStatus = "open" | "protected" | "candidate" | "intentionally-open";
+
 export interface Child {
   id: string;
   name: string;
@@ -60,6 +66,8 @@ export interface Conflict {
   severity: ConflictSeverity;
   description: string;
   suggestions: ConflictResolution[];
+  status: ConflictStatus;
+  chosenResolutionId?: string;
 }
 
 export interface ConflictResolution {
@@ -78,6 +86,7 @@ export interface FreeTimeBlock {
   quality: FreeTimeQuality;
   label: string;
   isProtected: boolean;
+  status: FreeTimeStatus;
 }
 
 export interface Suggestion {
@@ -91,6 +100,8 @@ export interface Suggestion {
   tags: string[];
   forChildId: string | "family";
   whyItFits: string;
+  isSaved: boolean;
+  isTryThisWeek: boolean;
 }
 
 export interface FamilyMember {
@@ -122,10 +133,34 @@ export interface FamilySettings {
   notifyConflicts: boolean;
   notifyFreeTime: boolean;
   notifyWeeklyPlan: boolean;
+  familyName: string;
+  parentName: string;
 }
 
 export interface DayLoad {
   day: DayOfWeek;
   hours: number;
   activities: number;
+}
+
+export interface OnboardingData {
+  completed: boolean;
+  familyName: string;
+  parentName: string;
+  children: Child[];
+  planningStyle: PlanningStyle;
+  preferredDowntimeHours: number;
+  travelBufferMinutes: number;
+  maxActivitiesPerDay: number;
+}
+
+export interface AppState {
+  onboarding: OnboardingData;
+  children: Child[];
+  activities: Activity[];
+  settings: FamilySettings;
+  conflictStatuses: Record<string, { status: ConflictStatus; chosenResolutionId?: string }>;
+  freeTimeStatuses: Record<string, FreeTimeStatus>;
+  savedSuggestions: string[];
+  tryThisWeekSuggestions: string[];
 }

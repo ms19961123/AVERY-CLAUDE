@@ -14,9 +14,11 @@ import {
   Menu,
   X,
   Heart,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useFamily } from "@/lib/family-context";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -26,12 +28,17 @@ const navItems = [
   { href: "/suggestions", label: "Suggestions", icon: Lightbulb },
   { href: "/children", label: "Children", icon: Users },
   { href: "/weekly-plan", label: "Weekly Plan", icon: FileText },
+  { href: "/pricing", label: "Pricing", icon: CreditCard },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { conflicts, conflictStatuses } = useFamily();
+  const unresolvedCount = conflicts.filter(
+    (c) => !conflictStatuses[c.id] || conflictStatuses[c.id].status === "unresolved"
+  ).length;
 
   return (
     <>
@@ -68,6 +75,11 @@ export function Navbar() {
                   >
                     <Icon size={16} />
                     <span>{item.label}</span>
+                    {item.href === "/conflicts" && unresolvedCount > 0 && (
+                      <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-coral-500 text-[10px] font-bold text-white px-1">
+                        {unresolvedCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
